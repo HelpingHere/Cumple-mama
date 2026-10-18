@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>¡Feliz Cumpleaños, Mami Mabel! ❤️</title>
+  
+  <!-- Google Fonts & Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Tone.js for Web Audio & Canvas Confetti -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            handwriting: ['"Caveat"', 'cursive'],
+          },
+          colors: {
+            roseGold: {
+              100: '#FFF0F3',
+              200: '#FFCCD5',
+              300: '#FFB3C1',
+              400: '#FF758F',
+              500: '#FF4D6D',
+              600: '#C9184A',
+              800: '#590D22',
+            },
+            champagne: '#FFF8F0',
+          },
+          animation: {
+            'float': 'float 4s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+            'shimmer': 'shimmer 2.5s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.8', filter: 'drop-shadow(0 0 10px rgba(255, 77, 109, 0.6))' },
+              '50%': { opacity: '1', filter: 'drop-shadow(0 0 25px rgba(255, 77, 109, 0.9))' },
+            },
+            shimmer: {
+              '100%': { transform: 'translateX(100%)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos personalizados para sensación de app móvil suave */
+    body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      background: radial-gradient(circle at top, #FFF0F3 0%, #FFE5EC 50%, #FFCCD5 100%);
+      background-attachment: fixed;
+    }
+
+    .polaroid-card {
+      box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.12), 0 8px 12px -6px rgba(0, 0, 0, 0.06);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .polaroid-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .polaroid-card:active {
+      transform: scale(0.98);
+    }
+
+    .envelope-shadow {
+      box-shadow: 0 20px 40px -15px rgba(201, 24, 74, 0.25);
+    }
+
+    /* Animación de llama de vela */
+    .flame {
+      animation: flicker 0.6s ease-in-out infinite alternate;
+      transform-origin: center bottom;
+    }
+
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+      50% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+      100% { transform: scale(0.95) rotate(-1deg); opacity: 0.85; }
+    }
+
+    .smoke {
+      animation: rise 1.5s ease-out forwards;
+    }
+
+    @keyframes rise {
+      0% { opacity: 0.8; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(2); }
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col items-center justify-between overflow-x-hidden selection:bg-roseGold-300 selection:text-roseGold-800 pb-12">
+
+  <!-- Ambient Hearts Floating Canvas Background -->
+  <canvas id="ambientCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Audio Controls Header -->
+  <header class="w-full max-w-lg px-4 pt-4 flex justify-between items-center z-10 sticky top-0 bg-white/50 backdrop-blur-md border-b border-white/60 rounded-b-2xl mb-4">
+    <div class="flex items-center space-x-2">
+      <span class="text-xl">💐</span>
+      <span class="font-serif font-bold text-roseGold-800 text-sm tracking-wide">Para Mamá Mabel</span>
+    </div>
+    <button id="musicBtn" onclick="toggleMusic()" class="flex items-center space-x-1.5 bg-white/90 hover:bg-white text-roseGold-600 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-roseGold-200 active:scale-95 transition">
+      <span id="musicIcon">🎵</span>
+      <span id="musicText">Música</span>
+    </button>
+  </header>
+
+  <!-- Main Responsive Container -->
+  <main class="w-full max-w-xl px-4 z-10 flex-1 flex flex-col space-y-8">
+
+    <!-- HERO / BANNER SECTION -->
+    <section class="text-center py-4 space-y-2 animate-float">
+      <span class="inline-block bg-roseGold-200 text-roseGold-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-inner">
+        ✨ ¡Hoy es tu día! ✨
+      </span>
+      <h1 class="font-serif text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+        ¡Feliz Cumpleaños,<br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-roseGold-500 via-roseGold-600 to-roseGold-800">
+          Mami Mabel!
+        </span> ❤️
+      </h1>
+      <p class="font-sans text-xs sm:text-sm text-slate-600 font-medium px-4">
+        Con todo el amor de Martín, Ramsés y Antonella para la mejor mamá del mundo.
+      </p>
+    </section>
+
+    <!-- INTERACTIVE ENVELOPE / LOVE LETTER SECTION -->
+    <section class="w-full">
+      <div id="envelopeCard" class="bg-white rounded-3xl p-6 border-2 border-roseGold-200 envelope-shadow transition-all duration-500 relative overflow-hidden">
+        
+        <!-- Closed State Preview -->
+        <div id="closedEnvelope" class="flex flex-col items-center justify-center text-center space-y-4 py-4 cursor-pointer" onclick="openLetter()">
+          <div class="w-20 h-20 rounded-full bg-roseGold-100 flex items-center justify-center text-4xl shadow-inner border border-roseGold-300 animate-pulse-glow">
+            ✉️
+          </div>
+          <div>
+            <h3 class="font-serif font-bold text-xl text-slate-800">Tienes una carta especial</h3>
+            <p class="text-xs text-roseGold-600 font-semibold mt-1">Toca aquí para abrir tu mensaje ❤️</p>
+          </div>
+        </div>
+
+        <!-- Open Letter Content (Hidden by default) -->
+        <div id="openLetter" class="hidden space-y-5 animate-fade-in">
+          <div class="flex justify-between items-center border-b border-roseGold-100 pb-3">
+            <span class="font-serif font-bold text-roseGold-800 text-lg">Para nuestra hermosa Mamá Mabel 🌹</span>
+            <span class="text-xs bg-roseGold-100 text-roseGold-600 px-2.5 py-1 rounded-full font-bold">100% Amor</span>
+          </div>
+
+          <div class="font-handwriting text-2xl text-slate-700 leading-relaxed space-y-4 pt-1">
+            <p>
+              ¡Feliz cumpleaños, Mami! 🎉 Hoy Te celebro este cumpleaños con todo el amor del mundo este fue un texto escrito por mi y no por la IA te amo mucho mami y te agradezco por ayudarnos a seguir por el camino del bien gracias por guiarnos y por enseñarnos valores los cuales aplicamos gracias por todo y gracias por siempre estar ahi para nosotros sin importar la circustancia.
+            </p>
+            <p>
+              Gracias por enseñarnos buenos valores para que seamos respetuosos y buenas personas perdoname si he sido grosero con tigo te amo mucho mami.
+            </p>
+            <p class="text-roseGold-600 font-bold">
+              ¡Deseamos que este nuevo año esté lleno de salud, infinitas bendiciones y momentos inolvidables a nuestro lado!
+            </p>
+          </div>
+
+          <!-- Featured Mini Photo inside letter -->
+          <div class="bg-roseGold-50 p-3 rounded-2xl border border-roseGold-200">
+            <div class="w-full h-80 sm:h-96 rounded-xl bg-slate-900/5 flex items-center justify-center overflow-hidden">
+              <img src="./1.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Mami+Mabel+y+Familia'" alt="Mamá Mabel y Familia" class="w-full h-full object-contain rounded-xl shadow-sm" />
+            </div>
+            <p class="text-center font-handwriting text-xl text-roseGold-800 mt-2 font-bold">¡Te amamos infinitamente!</p>
+          </div>
+
+          <div class="pt-2 border-t border-roseGold-100 text-right">
+            <p class="font-serif font-bold text-slate-800 text-sm">Con todo nuestro amor:</p>
+            <p class="font-handwriting text-2xl text-roseGold-600 font-bold">Martín, Ramsés y Antonella ❤️</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PHOTO GALLERY SECTION -->
+    <section class="space-y-6">
+      <div class="text-center">
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Nuestros Recordados Momentos 📸</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Galería de recuerdos hermosos e inolvidables</p>
+      </div>
+
+      <!-- Polaroid Cards Grid with Substantially Enlarged Container Heights -->
+      <div class="grid grid-cols-1 gap-8">
+        
+        <!-- Photo 1 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./1.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+1'" alt="Momento con Mamá Mabel 1" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Momentos Inolvidables ✨</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Mabel & Familia</p>
+          </div>
+        </div>
+
+        <!-- Photo 2 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./2.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+2'" alt="Momento con Mamá Mabel 2" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">Risas y Alegría 😄</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Unidos Siempre</p>
+          </div>
+        </div>
+
+        <!-- Photo 3 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./3.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+3'" alt="Momento con Mamá Mabel 3" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Celebrando la Vida 🌹</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Amor Incondicional</p>
+          </div>
+        </div>
+
+        <!-- Photo 4 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./4.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+4'" alt="Momento con Mamá Mabel 4" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">Siempre Juntos 💕</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Recuerdos en Familia</p>
+          </div>
+        </div>
+
+        <!-- Photo 5 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./5.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+5'" alt="Momento con Mamá Mabel 5" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Abrazos del Alma 🤗</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Bendiciones Diarias</p>
+          </div>
+        </div>
+
+        <!-- Photo 6 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./6.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+6'" alt="Momento con Mamá Mabel 6" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">Paseos y Sonrisas 🛍️</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">La Mejor Mamá</p>
+          </div>
+        </div>
+
+        <!-- Photo 7 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./7.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+7'" alt="Momento con Mamá Mabel 7" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Felicidad Compartida 🌟</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Unión Familiar</p>
+          </div>
+        </div>
+
+        <!-- Photo 8 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./8.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+8'" alt="Momento con Mamá Mabel 8" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">Amor Incondicional ❤️</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Nuestra Guía</p>
+          </div>
+        </div>
+
+        <!-- Photo 9 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./9.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+9'" alt="Momento con Mamá Mabel 9" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Un Año Más de Alegría 🎂</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Días Mágicos</p>
+          </div>
+        </div>
+
+        <!-- Photo 10 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./10.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+10'" alt="Momento con Mamá Mabel 10" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">Tu Sonrisa Nos Ilumina ☀️</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Mami Mabel</p>
+          </div>
+        </div>
+
+        <!-- Photo 11 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./11.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+11'" alt="Momento con Mamá Mabel 11" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Gratitud Infinita 🙏</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Por Tus Valores</p>
+          </div>
+        </div>
+
+        <!-- Photo 12 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./12.jpeg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+12'" alt="Momento con Mamá Mabel 12" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">Tesoro Familiar 💎</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Te Amo Mami</p>
+          </div>
+        </div>
+
+        <!-- Photo 13 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./13.jpg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+13'" alt="Momento con Mamá Mabel 13" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-slate-800 font-bold">Siempre Contigo 🤗</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Martín, Ramsés y Antonella</p>
+          </div>
+        </div>
+
+        <!-- Photo 14 -->
+        <div class="polaroid-card bg-white p-4 sm:p-5 rounded-3xl border border-slate-100">
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl bg-slate-900/5 flex items-center justify-center overflow-hidden relative">
+            <img src="./IMG-20250418-WA0001.jpg" onerror="this.src='https://placehold.co/600x800/FFCCD5/590D22?text=Foto+Especial+14'" alt="Momento con Mamá Mabel 14" class="w-full h-full object-contain p-1 rounded-2xl" />
+          </div>
+          <div class="pt-4 pb-1 text-center">
+            <p class="font-handwriting text-2xl sm:text-3xl text-roseGold-600 font-bold">¡Feliz Cumpleaños! 🥳</p>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Te Amamos Infinito</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- INTERACTIVE BIRTHDAY CAKE SECTION -->
+    <section class="bg-gradient-to-b from-white to-roseGold-100 rounded-3xl p-6 text-center border border-roseGold-200 shadow-md space-y-4">
+      <h3 class="font-serif font-bold text-2xl text-slate-900">¡Pide un Deseo, Mamá! 🕯️</h3>
+      <p class="text-xs text-slate-600">Toca las velas para encenderlas o apagarlas y soplar tu deseo de cumpleaños</p>
+
+      <!-- Cake Graphic -->
+      <div class="relative py-6 flex flex-col items-center justify-center cursor-pointer select-none" onclick="toggleCandles()">
+        
+        <!-- Candle Flames -->
+        <div class="flex space-x-6 mb-1 z-10" id="flamesGroup">
+          <div class="flame text-2xl filter drop-shadow">🔥</div>
+          <div class="flame text-2xl filter drop-shadow" style="animation-delay: 0.2s">🔥</div>
+          <div class="flame text-2xl filter drop-shadow" style="animation-delay: 0.4s">🔥</div>
+        </div>
+
+        <!-- Smoke Container (Hidden initially) -->
+        <div id="smokeGroup" class="hidden absolute top-0 flex space-x-6 z-10">
+          <div class="smoke text-xl">💨</div>
+          <div class="smoke text-xl">💨</div>
+          <div class="smoke text-xl">💨</div>
+        </div>
+
+        <!-- Cake Base Icons -->
+        <div class="text-6xl sm:text-7xl leading-none filter drop-shadow-md">
+          🎂
+        </div>
+      </div>
+
+      <button id="wishBtn" onclick="toggleCandles()" class="w-full bg-gradient-to-r from-roseGold-500 to-roseGold-600 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg active:scale-95 transition text-sm">
+        ✨ ¡Soplar las Velas!
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Footer Notice -->
+  <footer class="mt-8 text-center text-xs text-roseGold-800/60 font-semibold z-10">
+    Hecho con ❤️ para Mamá Mabel • 2026
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ===================================================
+       1. AMBIENT CANVAS BACKGROUND (Hearts & Sparkles)
+    =================================================== */
+    const canvas = document.getElementById('ambientCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const hearts = Array.from({ length: 22 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 14 + 8,
+      speedY: Math.random() * 0.8 + 0.3,
+      opacity: Math.random() * 0.5 + 0.2,
+      swing: Math.random() * 2,
+      swingSpeed: Math.random() * 0.02 + 0.01
+    }));
+
+    function drawHearts() {
+      ctx.clearRect(0, 0, width, height);
+      hearts.forEach(h => {
+        h.y -= h.speedY;
+        h.swing += h.swingSpeed;
+        const currentX = h.x + Math.sin(h.swing) * 15;
+
+        if (h.y < -20) {
+          h.y = height + 20;
+          h.x = Math.random() * width;
+        }
+
+        ctx.font = `${h.size}px serif`;
+        ctx.globalAlpha = h.opacity;
+        ctx.fillText('❤️', currentX, h.y);
+      });
+      requestAnimationFrame(drawHearts);
+    }
+    drawHearts();
+
+    /* ===================================================
+       2. LETTER TOGGLE & CONFETTI
+    =================================================== */
+    let isLetterOpen = false;
+
+    function openLetter() {
+      const closed = document.getElementById('closedEnvelope');
+      const open = document.getElementById('openLetter');
+      
+      if (!isLetterOpen) {
+        closed.classList.add('hidden');
+        open.classList.remove('hidden');
+        isLetterOpen = true;
+
+        // Sound effect
+        playChime();
+
+        // Trigger celebratory confetti
+        confetti({
+          particleCount: 70,
+          spread: 60,
+          origin: { y: 0.6 },
+          colors: ['#FF4D6D', '#FF758F', '#FFCCD5', '#FFF']
+        });
+      }
+    }
+
+    /* ===================================================
+       3. CANDLE BLOWOUT INTERACTION
+    =================================================== */
+    let candlesLit = true;
+
+    function toggleCandles() {
+      const flames = document.getElementById('flamesGroup');
+      const smoke = document.getElementById('smokeGroup');
+      const wishBtn = document.getElementById('wishBtn');
+
+      if (candlesLit) {
+        flames.classList.add('hidden');
+        smoke.classList.remove('hidden');
+        wishBtn.innerText = "🔥 Encender Velas de Nuevo";
+        candlesLit = false;
+
+        // Confetti explosion
+        confetti({
+          particleCount: 120,
+          spread: 100,
+          origin: { y: 0.7 },
+          colors: ['#FF4D6D', '#FFD166', '#06D6A0', '#118AB2']
+        });
+
+        playFanfare();
+      } else {
+        flames.classList.remove('hidden');
+        smoke.classList.add('hidden');
+        wishBtn.innerText = "✨ ¡Soplar las Velas!";
+        candlesLit = true;
+        playChime();
+      }
+    }
+
+    /* ===================================================
+   REPRODUCTOR DE AUDIO: TU CUMPLEAHOS - DIOMEDES DÍAZ
+=================================================== */
+// Creamos la etiqueta de audio apuntando a tu archivo local
+const audioDiomedes = new Audio('cumpleanos.mp3');
+audioDiomedes.loop = true; // Para que se repita si termina
+
+let musicPlaying = false;
+
+function toggleMusic() {
+  const btnText = document.getElementById('musicText');
+  const btnIcon = document.getElementById('musicIcon');
+
+  if (!musicPlaying) {
+    audioDiomedes.play().then(() => {
+      musicPlaying = true;
+      btnText.innerText = "Pausar";
+      btnIcon.innerText = "⏸️";
+    }).catch(error => {
+      console.log("Error al reproducir audio:", error);
+      alert("Asegúrate de tener el archivo 'cumpleanos.mp3' en la misma carpeta que el archivo HTML.");
+    });
+  } else {
+    audioDiomedes.pause();
+    musicPlaying = false;
+    btnText.innerText = "Música";
+    btnIcon.innerText = "🎵";
+  }
+}
+
+
+
+
+
+  </script>
+</body>
+</html>
